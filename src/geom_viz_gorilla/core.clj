@@ -7,10 +7,6 @@
             [thi.ng.color.core :as col]
             [thi.ng.math.core :as m :refer [PI TWO_PI]]))
 
-
-(defn export-viz
-  [viz path] (->> viz (svg/svg {:width 600 :height 320}) (svg/serialize) (spit path)))
-
 (defn calc-width-of-bar
   [x-data]
   (cond
