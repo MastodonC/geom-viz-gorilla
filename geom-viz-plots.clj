@@ -7,7 +7,7 @@
 
 ;; @@
 (ns teal-dusk
-  (:require [geom-viz-gorilla.core :refer [view-bar-chart view]]))
+  (:require [geom-viz-gorilla.core :refer [view-bar-chart view-line]]))
 ;; @@
 ;; =>
 ;;; {"type":"html","content":"<span class='clj-nil'>nil</span>","value":"nil"}
@@ -18,9 +18,6 @@
   []
   {:x (range 0 21)
    :y (take 20 (repeatedly #(rand-int 11)))})
-
-
-
 ;; @@
 ;; =>
 ;;; {"type":"html","content":"<span class='clj-var'>#&#x27;teal-dusk/dummy-values</span>","value":"#'teal-dusk/dummy-values"}
