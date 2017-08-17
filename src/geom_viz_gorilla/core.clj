@@ -60,15 +60,20 @@
 
 (defn bar-viz-spec
   [x-data y-data plot-width plot-height]
-  (let [lower-x (let [min-x (reduce min x-data)]
-                  (if (zero? min-x) 0 (dec min-x)))
-        upper-x (inc (reduce max x-data))]
+  (let [numeric? (every? number? x-data)
+        lower-x (if numeric?
+                  (let [min-x (reduce min x-data)]
+                    (if (zero? min-x) 0 (dec min-x)))
+                  0)
+        upper-x (if numeric?
+                  (inc (reduce max x-data))
+                  (inc (count x-data)))]
     {:x-axis (viz/linear-axis
               {:domain [lower-x upper-x]
                :range  [50 (- plot-width 20)]
                :major  1
                :pos    (- plot-height 40) ;;lower-y
-               :label  (viz/default-svg-label int)})
+               :label  (if numeric? (viz/default-svg-label int) (viz/default-svg-label #(str (if (and (> % lower-x) (< % upper-x)) (nth x-data (dec %)) ""))))})
      :y-axis (viz/linear-axis
               {:domain      (calc-y-domain y-data)
                :range       (calc-y-range plot-height)
@@ -83,10 +88,16 @@
   ([x-values y-values]
    (bar-chart x-values y-values {}))
   ([x-values y-values {:keys [plot-color plot-width plot-height]}]
-   (println x-values)
-   (let [x-min (reduce min x-values)
-         x-max (reduce max x-values)
-         all-data (map vector x-values y-values)
+   (let [x-numeric? (every? number? x-values)
+         x-min (if x-numeric?
+                 (reduce min x-values)
+                 0)
+         x-max (if x-numeric?
+                 (reduce max x-values)
+                 (inc (count x-values)))
+         all-data (map vector (if x-numeric?
+                                x-values
+                                (range 1 (inc (count x-values)))) y-values)
          bar-width (calc-width-of-bar x-values)
          color-plot (or plot-color "#3D325A")
          width-plot (or plot-width 600)
@@ -127,8 +138,10 @@
     {:type :html :content (plot-bar-chart (:x-values self) (:y-values self) (:options self)) :value (pr-str self)}))
 
 (defn view-bar-chart
-  [x-values y-values options]
-  (GeomViewBarChart. x-values y-values options))
+  ([x-values y-values]
+   (view-bar-chart x-values y-values {}))
+  ([x-values y-values options]
+   (GeomViewBarChart. x-values y-values options)))
 
 (defn viz-line
   [x-data y-data]
@@ -166,9 +179,6 @@
        (viz/svg-plot2d-cartesian)
        (svg/svg {:width 600 :height 320})
        (svg/serialize)))
-
-(defn render
-  [x-values y-values] (line-plot x-values y-values ))
 
 (defrecord GeomViewLine [x-values y-values])
 
