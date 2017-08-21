@@ -71,7 +71,7 @@
         numeric-fn int
         text-fn (fn [x] (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))
         label-fn (if numeric? numeric-fn text-fn)
-        vertical-label-fn (fn [f] (fn [p x] [:g {:writing-mode "tb-rl" :transform "translate(0,10)"} (svg/text p (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))]))]
+        vertical-label-fn (fn [f] (fn [p x] [:g {:writing-mode "tb-rl" :transform (str "translate(0," (* 2 (reduce max (map count x-data)))  ")")} (svg/text p (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))]))]
     {:x-axis (viz/linear-axis
               {:domain [lower-x upper-x]
                :range  [50 (- plot-width 20)]
@@ -93,7 +93,7 @@
 (defn bar-chart
   ([x-values y-values]
    (bar-chart x-values y-values {}))
-  ([x-values y-values {:keys [plot-color plot-width plot-height vertical-x-labels]}]
+  ([x-values y-values {:keys [plot-color plot-width plot-height vertical-x-labels svg-height]}]
    (let [x-numeric? (every? number? x-values)
          x-min (if x-numeric?
                  (reduce min x-values)
@@ -123,7 +123,7 @@
                 (assoc :data plot-data)
                 (viz/svg-plot2d-cartesian))
       :width width-plot
-      :height height-plot})))
+      :height (or svg-height height-plot)})))
 
 (defn plot-svg
   [svg-spec width height]
