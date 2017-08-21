@@ -59,7 +59,7 @@
      :offset     idx}))
 
 (defn bar-viz-spec
-  [x-data y-data plot-width plot-height]
+  [x-data y-data plot-width plot-height {:keys [vertical-x-labels]}]
   (let [numeric? (every? number? x-data)
         lower-x (if numeric?
                   (let [min-x (reduce min x-data)]
@@ -67,13 +67,19 @@
                   0)
         upper-x (if numeric?
                   (inc (reduce max x-data))
-                  (inc (count x-data)))]
+                  (inc (count x-data)))
+        numeric-fn int
+        text-fn (fn [x] (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))
+        label-fn (if numeric? numeric-fn text-fn)
+        vertical-label-fn (fn [f] (fn [p x] [:g {:writing-mode "tb-rl" :transform "translate(0,10)"} (svg/text p (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))]))]
     {:x-axis (viz/linear-axis
               {:domain [lower-x upper-x]
                :range  [50 (- plot-width 20)]
                :major  1
                :pos    (- plot-height 40) ;;lower-y
-               :label  (if numeric? (viz/default-svg-label int) (viz/default-svg-label #(str (if (and (> % lower-x) (< % upper-x)) (nth x-data (dec %)) ""))))})
+               :label  (if vertical-x-labels
+                         (vertical-label-fn label-fn)
+                         (viz/default-svg-label label-fn))})
      :y-axis (viz/linear-axis
               {:domain      (calc-y-domain y-data)
                :range       (calc-y-range plot-height)
@@ -87,7 +93,7 @@
 (defn bar-chart
   ([x-values y-values]
    (bar-chart x-values y-values {}))
-  ([x-values y-values {:keys [plot-color plot-width plot-height]}]
+  ([x-values y-values {:keys [plot-color plot-width plot-height vertical-x-labels]}]
    (let [x-numeric? (every? number? x-values)
          x-min (if x-numeric?
                  (reduce min x-values)
@@ -113,7 +119,7 @@
                color-plot)
          ;; If y values negative, add line at y = 0
          plot-data (if (neg? (reduce min y-values)) [plot flip-line] [plot])]
-     {:plot (-> (bar-viz-spec x-values y-values width-plot height-plot)
+     {:plot (-> (bar-viz-spec x-values y-values width-plot height-plot {:vertical-x-labels vertical-x-labels})
                 (assoc :data plot-data)
                 (viz/svg-plot2d-cartesian))
       :width width-plot
