@@ -71,7 +71,8 @@
         numeric-fn int
         text-fn (fn [x] (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))
         label-fn (if numeric? numeric-fn text-fn)
-        vertical-label-fn (fn [f] (fn [p x] [:g {:writing-mode "tb-rl" :transform (str "translate(0," (* 2 (reduce max (map count x-data)))  ")")} (svg/text p (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))]))]
+        label-string-fn (fn [x] (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) ""))
+        vertical-label-fn (fn [f] (fn [p x] [:g {:writing-mode "tb-rl" :transform (str "translate(0,"  (* 2 (count (label-string-fn x)))  ")")} (svg/text p (str (label-string-fn x)))]))]
     {:x-axis (viz/linear-axis
               {:domain [lower-x upper-x]
                :range  [50 (- plot-width 20)]
