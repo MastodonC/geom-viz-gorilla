@@ -10,3 +10,6 @@ pom.xml.asc
 .hgignore
 .hg/
 .DS_Store
+.#geom-viz-plots.clj
+.nrepl-port
+.gorilla-port
