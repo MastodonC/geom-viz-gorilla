@@ -176,6 +176,7 @@
                :major  (int (Math/floor (/ upper-x 3)))
                :minor  (/ PI 4)
                :pos    250
+               :label-dist  30
                :label  (if vertical-x-labels
                          (vertical-label-fn label-fn)
                          (viz/default-svg-label label-fn))})
