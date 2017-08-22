@@ -153,7 +153,7 @@
 
 
 (defn viz-line
-   [x-data y-data {:keys [vertical-x-labels]}]
+  [x-data y-data {:keys [vertical-x-labels]}]
   (let [numeric? (every? number? x-data)
         lower-x (if numeric?
                   (let [min-x (reduce min x-data)]
@@ -161,21 +161,24 @@
                   0)
         upper-x (if numeric?
                   (inc (reduce max x-data))
-                  (inc (count x-data)))        
+                  (inc (count x-data)))
         numeric-fn int
         text-fn (fn [x] (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))
         label-fn (if numeric? numeric-fn text-fn)
         label-string-fn (fn [x] (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) ""))
-        vertical-label-fn (fn [f] (fn [p x] [:g {:writing-mode "tb-rl" :transform (str "translate(0,"  (* 2 (count (label-string-fn x)))  ")")} (svg/text p (str (label-string-fn x)))]))]
+        vertical-label-fn (fn [f] (fn [p x] [:g {:writing-mode "tb-rl" :transform (str "translate(0,"  (* 2 (count (label-string-fn x)))  "`)")} (svg/text p (str (label-string-fn x)))]))
+        lower-y (let [min-y (reduce min y-data)]
+                  (if (zero? min-y) 0 (dec min-y)))
+        upper-y (inc (reduce max y-data))]
     {:x-axis (viz/linear-axis
               {:domain [lower-x upper-x]
                :range  [50 500]
                :major  (int (Math/floor (/ upper-x 3)))
                :minor  (/ PI 4)
-               :pos    250}
+               :pos    250
                :label  (if vertical-x-labels
                          (vertical-label-fn label-fn)
-                         (viz/default-svg-label label-fn)))
+                         (viz/default-svg-label label-fn))})
      :y-axis (viz/linear-axis
               {:domain      [lower-y upper-y]
                :range       [250 20]
@@ -186,26 +189,27 @@
                :label-style {:text-anchor "end"}})
      :grid   {:attribs {:stroke "#caa"}
               :minor-y true}
-     :data [{:values (->> (interleave  (if x-data-numeric? x-data (range 1 (inc x-data))) y-data)
+     :data [{:values (->> (interleave  (if numeric? x-data (range 1 (inc (count x-data)))) y-data)
                           (partition 2)
                           (map vec))
              :attribs {:fill "none" :stroke "#0af"}
              :layout viz/svg-line-plot}]}))
 
 (defn line-plot
-  [x-values y-values]
-  (->> (viz-line x-values y-values)
+  [x-values y-values options]
+  (->> (viz-line x-values y-values options)
        (viz/svg-plot2d-cartesian)
        (svg/svg {:width 600 :height 320})
        (svg/serialize)))
 
-(defrecord GeomViewLine [x-values y-values])
-
+(defrecord GeomViewLine [x-values y-values options])
 (extend-type GeomViewLine
   render/Renderable
   (render [self]
-    {:type :html :content (line-plot (:x-values self) (:y-values self)) :value (pr-str self)}))
+    {:type :html :content (line-plot (:x-values self) (:y-values self) (:options self)) :value (pr-str self)}))
 
 (defn view-line
-  [x-values y-values]
-  (GeomViewLine. x-values y-values))
+  ([x-values y-values]
+   (view-line x-values y-values {}))
+  ([x-values y-values options]
+   (GeomViewLine. x-values y-values options)))
