@@ -277,6 +277,6 @@
 
 (defn view-scatter
   ([x-values y-values]
-   (view-line x-values y-values {}))
+   (view-scatter x-values y-values {}))
   ([x-values y-values options]
    (GeomViewScatter. x-values y-values options)))
