@@ -150,7 +150,7 @@
   ([x-values y-values options]
    (GeomViewBarChart. x-values y-values options)))
 
-
+;;;;;;;;;;;; line plot ;;;;;;;
 
 (defn viz-line
   [x-data y-data {:keys [vertical-x-labels]}]
@@ -214,3 +214,76 @@
    (view-line x-values y-values {}))
   ([x-values y-values options]
    (GeomViewLine. x-values y-values options)))
+
+;;;; scatter plot ;;;;;
+
+(defn viz-scatter
+  [x-data y-data {:keys [vertical-x-labels]}]
+  (let [numeric? (every? number? x-data)
+        lower-x (if numeric?
+                  (let [min-x (reduce min x-data)]
+                    (if (zero? min-x) 0 (dec min-x)))
+                  0)
+        upper-x (if numeric?
+                  (inc (reduce max x-data))
+                  (inc (count x-data)))
+        numeric-fn int
+        text-fn (fn [x] (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))
+        label-fn (if numeric? numeric-fn text-fn)
+        label-string-fn (fn [x] (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) ""))
+        vertical-label-fn (fn [f] (fn [p x] [:g {:writing-mode "tb-rl" :transform (str "translate(0,"  (* 2 (count (label-string-fn x)))  "`)")} (svg/text p (str (label-string-fn x)))]))
+        lower-y (let [min-y (reduce min y-data)]
+                  (if (zero? min-y) 0 (dec min-y)))
+        upper-y (inc (reduce max y-data))]
+    {:x-axis (viz/linear-axis
+              {:domain [lower-x upper-x]
+               :range  [50 500]
+               :major  (int (Math/floor (/ upper-x 3)))
+               :minor  (/ PI 4)
+               :pos    250
+               :label-dist  30
+               :label  (if vertical-x-labels
+                         (vertical-label-fn label-fn)
+                         (viz/default-svg-label label-fn))})
+     :y-axis (viz/linear-axis
+              {:domain      [lower-y upper-y]
+               :range       [250 20]
+               :major       (int (Math/floor (/ upper-y 3)))
+               :minor       1
+               :pos         50
+               :label-dist  15
+               :label-style {:text-anchor "end"}})
+     :grid   {:attribs {:stroke "#caa"}
+              :minor-y true}
+     :data [{:values (->> (interleave  (if numeric? x-data (range 1 (inc (count x-data)))) y-data)
+                          (partition 2)
+                          (map vec))
+             :attribs {:fill "none" :stroke "#0af"}
+             :shape   (viz/svg-triangle-down 6)
+             :layout viz/svg-scatter-plot}
+            {:values (->> (interleave  (if numeric? x-data (range 1 (inc (count x-data)))) y-data)
+                          (partition 2)
+                          (map vec))
+             :attribs {:fill "none" :stroke "#0af"}
+             :shape   (viz/svg-triangle-down 6)
+             :layout viz/svg-scatter-plot}]}))
+
+(defn scatter-plot
+  [x-values y-values options]
+  (->> (viz-scatter x-values y-values options)
+       (viz/svg-plot2d-cartesian)
+       (svg/svg {:width 600 :height 320})
+       (svg/serialize)))
+
+(defrecord GeomViewScatter [x-values y-values options])
+(extend-type GeomViewScatter
+  render/Renderable
+  (render [self]
+    {:type :html :content (scatter-plot (:x-values self) (:y-values self) (:options self)) :value (pr-str self)}))
+
+(defn view-scatter
+  ([x-values y-values]
+   (view-line x-values y-values {}))
+  ([x-values y-values options]
+   (GeomViewScatter. x-values y-values options)))
+
