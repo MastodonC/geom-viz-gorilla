@@ -58,6 +58,22 @@
      :bar-width  width
      :offset     idx}))
 
+(defn major
+  "finding the power of 10 that is the unit we want just below the given number"
+  [x]
+  (reduce
+   (fn [acc el]
+     (if (and (<= el x) (> (* 10 x) el))
+       el
+       acc))
+   1
+   (map #(Math/pow 10 %) (range 0 10))))
+
+(defn calc-major-minor
+  [lower upper]
+  (let [major (major (max (Math/abs lower) (Math/abs upper)))]
+    [major (/ major 2)]))
+
 (defn bar-viz-spec
   [x-data y-data plot-width plot-height {:keys [vertical-x-labels]}]
   (let [numeric? (every? number? x-data)
@@ -68,6 +84,8 @@
         upper-x (if numeric?
                   (inc (reduce max x-data))
                   (inc (count x-data)))
+        [lower-y upper-y] (calc-y-domain y-data)
+        [major-y minor-y] (calc-major-minor lower-y upper-y)
         numeric-fn int
         text-fn (fn [x] (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))
         label-fn (if numeric? numeric-fn text-fn)
@@ -82,10 +100,10 @@
                          (vertical-label-fn label-fn)
                          (viz/default-svg-label label-fn))})
      :y-axis (viz/linear-axis
-              {:domain      (calc-y-domain y-data)
+              {:domain      [lower-y upper-y]
                :range       (calc-y-range plot-height)
-               :major       10
-               :minor       5
+               :major       (if (> major-y 1) (int major-y) major-y)
+               :minor       (if (> minor-y 1) (int minor-y) minor-y)
                :pos         50
                :label-dist  15
                :label-style {:text-anchor "end"}})
