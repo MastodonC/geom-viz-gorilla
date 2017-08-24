@@ -260,12 +260,6 @@
                           (map vec))
              :attribs {:fill "none" :stroke "#0af"}
              :shape   (viz/svg-triangle-down 6)
-             :layout viz/svg-scatter-plot}
-            {:values (->> (interleave  (if numeric? x-data (range 1 (inc (count x-data)))) y-data)
-                          (partition 2)
-                          (map vec))
-             :attribs {:fill "none" :stroke "#0af"}
-             :shape   (viz/svg-triangle-down 6)
              :layout viz/svg-scatter-plot}]}))
 
 (defn scatter-plot
@@ -286,4 +280,3 @@
    (view-line x-values y-values {}))
   ([x-values y-values options]
    (GeomViewScatter. x-values y-values options)))
-
