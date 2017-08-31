@@ -75,7 +75,7 @@
     [major (/ major 2)]))
 
 (defn bar-viz-spec
-  [x-data y-data plot-width plot-height {:keys [vertical-x-labels]}]
+  [x-data y-data plot-width plot-height {:keys [vertical-x-labels x-major x-minor y-major y-minor]}]
   (let [numeric? (every? number? x-data)
         lower-x (if numeric?
                   (let [min-x (reduce min x-data)]
@@ -94,7 +94,8 @@
     {:x-axis (viz/linear-axis
               {:domain [lower-x upper-x]
                :range  [50 (- plot-width 20)]
-               :major  1
+               :major  (or x-major 1)
+               :minor (or x-minor 1)
                :pos    (- plot-height 40) ;;lower-y
                :label  (if vertical-x-labels
                          (vertical-label-fn label-fn)
@@ -102,9 +103,9 @@
      :y-axis (viz/linear-axis
               {:domain      [lower-y upper-y]
                :range       (calc-y-range plot-height)
-               :major       (if (> major-y 1) (int major-y) major-y)
-               :minor       (if (> minor-y 1) (int minor-y) minor-y)
-               :pos         50
+               :major       (or y-major (if (> major-y 1) (int major-y) major-y))
+               :minor       (or y-minor (if (> minor-y 1) (int minor-y) minor-y))
+               :pos          50
                :label-dist  15
                :label-style {:text-anchor "end"}})
      :grid   {:minor-y true}}))
@@ -112,7 +113,7 @@
 (defn bar-chart
   ([x-values y-values]
    (bar-chart x-values y-values {}))
-  ([x-values y-values {:keys [plot-color plot-width plot-height vertical-x-labels svg-height]}]
+  ([x-values y-values {:keys [plot-color plot-width plot-height vertical-x-labels svg-height] :as options}]
    (let [x-numeric? (every? number? x-values)
          x-min (if x-numeric?
                  (reduce min x-values)
@@ -138,7 +139,7 @@
                color-plot)
          ;; If y values negative, add line at y = 0
          plot-data (if (neg? (reduce min y-values)) [plot flip-line] [plot])]
-     {:plot (-> (bar-viz-spec x-values y-values width-plot height-plot {:vertical-x-labels vertical-x-labels})
+     {:plot (-> (bar-viz-spec x-values y-values width-plot height-plot options)
                 (assoc :data plot-data)
                 (viz/svg-plot2d-cartesian))
       :width width-plot
