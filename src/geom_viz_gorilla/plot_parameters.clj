@@ -12,9 +12,14 @@
   [(- plot-height 40) 20])
 
 (defn calc-x-domain [x-data]
-  (let [lower-x (let [min-x (reduce min x-data)]
-                  (if (neg? min-x) (+ min-x (* 0.2 min-x)) 0))
-        upper-x (let [max-x (reduce max x-data)] (+ (* 0.01 max-x) max-x))]
+  (let [numeric? (every? number? x-data)
+        lower-x  (if numeric?
+                   (let [min-x (reduce min x-data)]
+                     (if (zero? min-x) 0 (dec min-x)))
+                   0)
+        upper-x  (if numeric?
+                   (inc (reduce max x-data))
+                   (inc (count x-data)))]
     [lower-x upper-x]))
 
 (defn calc-y-domain [y-data]

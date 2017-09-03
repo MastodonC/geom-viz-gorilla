@@ -21,13 +21,7 @@
 (defn bar-viz-spec
   [x-data y-data plot-width plot-height {:keys [vertical-x-labels x-major x-minor y-major y-minor]}]
   (let [numeric? (every? number? x-data)
-        lower-x (if numeric?
-                  (let [min-x (reduce min x-data)]
-                    (if (zero? min-x) 0 (dec min-x)))
-                  0)
-        upper-x (if numeric?
-                  (inc (reduce max x-data))
-                  (inc (count x-data)))
+        [lower-x upper-x] (calc-x-domain x-data)
         [lower-y upper-y] (calc-y-domain y-data)
         [major-y minor-y] (calc-major-minor lower-y upper-y)
         numeric-fn int
@@ -93,13 +87,7 @@
 (defn viz-line
   [x-data y-data {:keys [vertical-x-labels]}]
   (let [numeric? (every? number? x-data)
-        lower-x (if numeric?
-                  (let [min-x (reduce min x-data)]
-                    (if (zero? min-x) 0 (dec min-x)))
-                  0)
-        upper-x (if numeric?
-                  (inc (reduce max x-data))
-                  (inc (count x-data)))
+        [lower-x upper-x] (calc-x-domain x-data)
         numeric-fn int
         text-fn (fn [x] (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))
         label-fn (if numeric? numeric-fn text-fn)
@@ -139,13 +127,7 @@
 (defn viz-scatter
   [x-data y-data {:keys [vertical-x-labels]}]
   (let [numeric? (every? number? x-data)
-        lower-x (if numeric?
-                  (let [min-x (reduce min x-data)]
-                    (if (zero? min-x) 0 (dec min-x)))
-                  0)
-        upper-x (if numeric?
-                  (inc (reduce max x-data))
-                  (inc (count x-data)))
+        [lower-x upper-x] (calc-x-domain x-data)
         numeric-fn int
         text-fn (fn [x] (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))
         label-fn (if numeric? numeric-fn text-fn)
