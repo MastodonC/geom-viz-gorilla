@@ -60,3 +60,13 @@
   [lower upper]
   (let [major (major (max (Math/abs lower) (Math/abs upper)))]
     [major (/ major 2)]))
+
+(defn label-fn
+  [numeric? lower-x upper-x x-data]
+  (if numeric?
+    int
+    (fn [x] (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))))
+
+(defn vertical-label-fn
+  [f]
+  (fn [p x] [:g {:writing-mode "tb-rl" :transform (str "translate(0,"  (* 2 (count (f x)))  "`)")} (svg/text p (str (f x)))]))

@@ -24,11 +24,7 @@
         [lower-x upper-x] (calc-x-domain x-data)
         [lower-y upper-y] (calc-y-domain y-data)
         [major-y minor-y] (calc-major-minor lower-y upper-y)
-        numeric-fn int
-        text-fn (fn [x] (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))
-        label-fn (if numeric? numeric-fn text-fn)
-        label-string-fn (fn [x] (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) ""))
-        vertical-label-fn (fn [f] (fn [p x] [:g {:writing-mode "tb-rl" :transform (str "translate(0,"  (* 2 (count (label-string-fn x)))  ")")} (svg/text p (str (label-string-fn x)))]))]
+        label-function (label-fn numeric? lower-x upper-x x-data)]
     {:x-axis (viz/linear-axis
               {:domain [lower-x upper-x]
                :range  [50 (- plot-width 20)]
@@ -36,8 +32,8 @@
                :minor (or x-minor 1)
                :pos    (- plot-height 40) ;;lower-y
                :label  (if vertical-x-labels
-                         (vertical-label-fn label-fn)
-                         (viz/default-svg-label label-fn))})
+                         (vertical-label-fn label-function)
+                         (viz/default-svg-label label-function))})
      :y-axis (viz/linear-axis
               {:domain      [lower-y upper-y]
                :range       (calc-y-range plot-height)
@@ -88,14 +84,10 @@
   [x-data y-data {:keys [vertical-x-labels]}]
   (let [numeric? (every? number? x-data)
         [lower-x upper-x] (calc-x-domain x-data)
-        numeric-fn int
-        text-fn (fn [x] (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))
-        label-fn (if numeric? numeric-fn text-fn)
-        label-string-fn (fn [x] (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) ""))
-        vertical-label-fn (fn [f] (fn [p x] [:g {:writing-mode "tb-rl" :transform (str "translate(0,"  (* 2 (count (label-string-fn x)))  "`)")} (svg/text p (str (label-string-fn x)))]))
         lower-y (let [min-y (reduce min y-data)]
                   (if (zero? min-y) 0 (dec min-y)))
-        upper-y (inc (reduce max y-data))]
+        upper-y (inc (reduce max y-data))
+        label-function (label-fn numeric? lower-x upper-x x-data)]
     {:x-axis (viz/linear-axis
               {:domain [lower-x upper-x]
                :range  [50 500]
@@ -104,8 +96,8 @@
                :pos    250
                :label-dist  30
                :label  (if vertical-x-labels
-                         (vertical-label-fn label-fn)
-                         (viz/default-svg-label label-fn))})
+                         (vertical-label-fn label-function)
+                         (viz/default-svg-label label-function))})
      :y-axis (viz/linear-axis
               {:domain      [lower-y upper-y]
                :range       [250 20]
@@ -128,11 +120,7 @@
   [x-data y-data {:keys [vertical-x-labels]}]
   (let [numeric? (every? number? x-data)
         [lower-x upper-x] (calc-x-domain x-data)
-        numeric-fn int
-        text-fn (fn [x] (str (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) "")))
-        label-fn (if numeric? numeric-fn text-fn)
-        label-string-fn (fn [x] (if (and (> x lower-x) (< x upper-x)) (nth x-data (dec x)) ""))
-        vertical-label-fn (fn [f] (fn [p x] [:g {:writing-mode "tb-rl" :transform (str "translate(0,"  (* 2 (count (label-string-fn x)))  "`)")} (svg/text p (str (label-string-fn x)))]))
+        label-function (label-fn numeric? lower-x upper-x x-data)
         lower-y (let [min-y (reduce min y-data)]
                   (if (zero? min-y) 0 (dec min-y)))
         upper-y (inc (reduce max y-data))]
@@ -144,8 +132,8 @@
                :pos    250
                :label-dist  30
                :label  (if vertical-x-labels
-                         (vertical-label-fn label-fn)
-                         (viz/default-svg-label label-fn))})
+                         (vertical-label-fn label-function)
+                         (viz/default-svg-label label-function))})
      :y-axis (viz/linear-axis
               {:domain      [lower-y upper-y]
                :range       [250 20]
