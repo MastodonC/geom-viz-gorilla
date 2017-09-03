@@ -84,8 +84,7 @@
          ;; If y values negative, add line at y = 0
          plot-data (if (neg? (reduce min y-values)) [plot flip-line] [plot])]
      {:plot (-> (bar-viz-spec x-values y-values width-plot height-plot options)
-                (assoc :data plot-data)
-                (viz/svg-plot2d-cartesian))
+                (assoc :data plot-data))
       :width width-plot
       :height (or svg-height height-plot)})))
 
@@ -185,12 +184,6 @@
 ;; svg utils
 
 (defn plot-svg
-  [svg-spec width height]
-  (->> svg-spec
-       (svg/svg {:width width :height height})
-       (svg/serialize)))
-
-(defn plot-svg-cartesian
   [svg-spec width height]
   (->> svg-spec
        (viz/svg-plot2d-cartesian)

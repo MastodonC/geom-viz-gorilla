@@ -27,7 +27,7 @@
 (defn line-plot
   [x-values y-values options]
   (-> (viz-line x-values y-values options)
-      (plot-svg-cartesian 600 320)))
+      (plot-svg 600 320)))
 
 (defrecord GeomViewLine [x-values y-values options])
 (extend-type GeomViewLine
@@ -47,7 +47,7 @@
 (defn scatter-plot
   [x-values y-values options]
   (-> (viz-scatter x-values y-values options)
-      (plot-svg-cartesian 600 320)))
+      (plot-svg 600 320)))
 
 (defrecord GeomViewScatter [x-values y-values options])
 (extend-type GeomViewScatter
